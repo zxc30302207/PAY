@@ -242,8 +242,8 @@
     </section>
   </main>
 
-  <footer>
-    提示：前三個答案會自然構成最終四位數鎖碼。請留意線索中的順序與對應符號。
+    <footer>
+    提示：線索散落於各處，請自行整理推論最終鎖碼。
   </footer>
 
   <script>
@@ -266,24 +266,25 @@
     };
 
     const objectData = [
-      {
+      { 
         name: '壁畫 —「天體之序」',
         text: '一幅描繪黎明、月升與群星的壁畫，底部刻著：黃昏從日落開始，月亮追隨，最後才是碎星。',
-        effect: () => addLog('壁畫暗示轉盤順序：日 → 月 → 星。')
+        effect: () => addLog('壁畫上的日、月、星依次延展，或許暗示了某種排列。')
       },
-      {
+      { 
         name: '桌上紙條 — 凍結的訊息',
-        text: '紙條寫著：「Gdkkn Vnqkc」並標註「-1」。旁邊有一支羽毛筆。',
+        text: '紙條寫著：「Ifmmp Xpsme」並標註「-1」。旁邊有一支羽毛筆。',
         effect: () => {
-          addLog('紙條提示凱撒位移 -1，將密文往回挪動。');
+          addLog('紙條旁的「-1」似乎在提醒：把訊息往回推。');
+
           state.inventory.push('quill');
           refreshStatus();
         }
       },
-      {
+      { 
         name: '展示櫃 — 發光的符文',
         text: '三個符文分別是 △, ◇, ⭕ ，旁邊刻著「尖角=3，棱面=4，圓環=0」。',
-        effect: () => addLog('符文揭示數字對應：△→3, ◇→4, ⭕→0。')
+        effect: () => addLog('符文底座刻有數字對應，得自己筆記下來。')
       }
     ];
 
@@ -384,7 +385,7 @@
       wrap.className = 'puzzle';
       wrap.innerHTML = `
         <h3>2) 羽筆密碼</h3>
-        <p>紙條標示「-1」，代表凱撒位移。輸入解碼後的單詞。</p>
+        <p>紙條標示「-1」，把它當作鑰匙，還原訊息後輸入答案。</p>
       `;
 
       const row = document.createElement('div');
@@ -403,13 +404,12 @@
             refreshStatus();
           }
         } else {
-          addLog('答案不對。嘗試將每個字母往回移一格。');
+          addLog('羽筆沒有動靜，換個方式重新推回訊息。');
         }
       });
 
       row.append(input, btn);
       wrap.append(row);
-      wrap.insertAdjacentHTML('beforeend', '<p class="hint">提示：Gdkkn Vnqkc ← 每個字母 -1。</p>');
       puzzleArea.append(wrap);
     }
 
@@ -436,7 +436,7 @@
             refreshStatus();
           }
         } else {
-          addLog('符文仍然暗淡，順序是 △, ◇, ⭕。');
+          addLog('符文仍然暗淡，或許順序與陳列時一致。');
         }
       });
 
@@ -450,7 +450,7 @@
       wrap.className = 'puzzle';
       wrap.innerHTML = `
         <h3>最終鎖碼</h3>
-        <p>將三段數字按提示組成四位數。壁畫象徵「日、月、星」→ 615，符文提示順序為第一段在前，最後補上光之序號「8」。</p>
+        <p>將三段數字按提示組成四位數。壁畫的順序、羽筆留下的數字與符文刻痕會互相呼應，最後別忘了那座常亮的燈塔。</p>
       `;
 
       const row = document.createElement('div');
@@ -474,7 +474,7 @@
 
       row.append(input, btn);
       wrap.append(row);
-      wrap.insertAdjacentHTML('beforeend', '<p class="hint">組合提示：第一碼來自轉盤，第二碼來自羽筆，第三碼來自符文，最後補上常亮的燈塔數「8」。</p>');
+
       puzzleArea.append(wrap);
     }
 
