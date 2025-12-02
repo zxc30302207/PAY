@@ -276,6 +276,7 @@
         text: '紙條寫著：「Ifmmp Xpsme」並標註「-1」。旁邊有一支羽毛筆。',
         effect: () => {
           addLog('紙條旁的「-1」似乎在提醒：把訊息往回推。');
+
           state.inventory.push('quill');
           refreshStatus();
         }
@@ -473,6 +474,7 @@
 
       row.append(input, btn);
       wrap.append(row);
+
       puzzleArea.append(wrap);
     }
 
