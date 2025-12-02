@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>謎盒逃脫</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --accent: #ffb400;
+      --surface: color-mix(in srgb, #1c1c24, #fdfdfd 10%);
+      --card: color-mix(in srgb, var(--surface), #ffffff 15%);
+      --muted: color-mix(in srgb, #8a8fa3, #3f3f45 20%);
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      margin: 0;
+      background: radial-gradient(circle at 20% 20%, rgba(255,180,0,0.08), transparent 30%),
+                  radial-gradient(circle at 80% 10%, rgba(0,176,255,0.08), transparent 28%),
+                  var(--surface);
+      color: #eae8f0;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      padding: 32px 16px 12px;
+    }
+
+    h1 {
+      margin: 0;
+      letter-spacing: 2px;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 16px 64px;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+
+    .panel {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 18px 20px;
+      box-shadow: 0 14px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .panel h2 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .status li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: linear-gradient(120deg, rgba(255,180,0,0.08), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      background: rgba(255,180,0,0.12);
+      color: #ffd166;
+      border: 1px solid rgba(255,180,0,0.2);
+    }
+
+    .objects {
+      display: grid;
+      gap: 12px;
+    }
+
+    .obj-card {
+      display: grid;
+      gap: 6px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.02);
+      border: 1px dashed rgba(255,255,255,0.08);
+    }
+
+    .obj-card button,
+    .puzzle button {
+      background: linear-gradient(120deg, #ffb400, #ff7a00);
+      color: #0f0f14;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+      box-shadow: 0 10px 24px rgba(255,140,0,0.35);
+    }
+
+    .obj-card button:hover,
+    .puzzle button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(255,140,0,0.4);
+    }
+
+    .obj-card code {
+      color: #ffd166;
+    }
+
+    .puzzle {
+      display: grid;
+      gap: 14px;
+    }
+
+    .dials {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(80px, 1fr));
+      gap: 10px;
+    }
+
+    .dial {
+      padding: 14px 10px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 18px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background 140ms ease, transform 120ms ease;
+    }
+
+    .dial:active {
+      transform: scale(0.98);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      min-width: 180px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(0,0,0,0.3);
+      color: #fff;
+      font-size: 15px;
+    }
+
+    .log {
+      height: 160px;
+      overflow: auto;
+      background: rgba(0,0,0,0.35);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,0.05);
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      color: #d9dde6;
+    }
+
+    .hint {
+      color: #9fc5ff;
+      font-size: 14px;
+    }
+
+    .progress {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, #ff7a00, #ffdd55);
+      width: 0%;
+      transition: width 180ms ease;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 18px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>謎盒逃脫</h1>
+    <p class="subtitle">解讀房間裡的線索，推理出三段鎖碼，最終打開光之匣。</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>狀態面板</h2>
+      <div class="progress" aria-label="完成度"><span id="progress"></span></div>
+      <ul class="status" id="statusList"></ul>
+    </section>
+
+    <section class="panel">
+      <h2>房間線索</h2>
+      <div class="objects" id="objects"></div>
+    </section>
+
+    <section class="panel">
+      <h2>謎題控制台</h2>
+      <div class="puzzle" id="puzzle"></div>
+    </section>
+
+    <section class="panel">
+      <h2>解題日誌</h2>
+      <div class="log" id="log"></div>
+    </section>
+  </main>
+
+    <footer>
+    提示：線索散落於各處，請自行整理推論最終鎖碼。
+  </footer>
+
+  <script>
+    const logBox = document.querySelector('#log');
+    const statusList = document.querySelector('#statusList');
+    const progressBar = document.querySelector('#progress');
+    const puzzleArea = document.querySelector('#puzzle');
+    const objectsArea = document.querySelector('#objects');
+
+    const state = {
+      solved: {
+        dials: false,
+        cipher: false,
+        glyph: false,
+        final: false
+      },
+      dialSymbols: ['☀', '☾', '✶', '✦'],
+      currentDials: [0, 1, 2],
+      inventory: []
+    };
+
+    const objectData = [
+      { 
+        name: '壁畫 —「天體之序」',
+        text: '一幅描繪黎明、月升與群星的壁畫，底部刻著：黃昏從日落開始，月亮追隨，最後才是碎星。',
+        effect: () => addLog('壁畫上的日、月、星依次延展，或許暗示了某種排列。')
+      },
+      { 
+        name: '桌上紙條 — 凍結的訊息',
+        text: '紙條寫著：「Ifmmp Xpsme」並標註「-1」。旁邊有一支羽毛筆。',
+        effect: () => {
+          addLog('紙條旁的「-1」似乎在提醒：把訊息往回推。');
+          state.inventory.push('quill');
+          refreshStatus();
+        }
+      },
+      { 
+        name: '展示櫃 — 發光的符文',
+        text: '三個符文分別是 △, ◇, ⭕ ，旁邊刻著「尖角=3，棱面=4，圓環=0」。',
+        effect: () => addLog('符文底座刻有數字對應，得自己筆記下來。')
+      }
+    ];
+
+    function addLog(message) {
+      const line = document.createElement('div');
+      const time = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+      line.textContent = `[${time}] ${message}`;
+      logBox.append(line);
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function refreshStatus() {
+      statusList.innerHTML = '';
+      const entries = [
+        { label: '星盤轉盤', key: 'dials' },
+        { label: '羽筆密碼', key: 'cipher' },
+        { label: '符文速記', key: 'glyph' },
+        { label: '最終鎖碼', key: 'final' },
+      ];
+
+      const solvedCount = entries.filter(e => state.solved[e.key]).length;
+      progressBar.style.width = `${(solvedCount / entries.length) * 100}%`;
+
+      entries.forEach(entry => {
+        const li = document.createElement('li');
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = state.solved[entry.key] ? '已解' : '待解';
+        li.innerHTML = `<span>${entry.label}</span>`;
+        li.append(badge);
+        statusList.append(li);
+      });
+    }
+
+    function renderObjects() {
+      objectsArea.innerHTML = '';
+      objectData.forEach(obj => {
+        const card = document.createElement('article');
+        card.className = 'obj-card';
+        card.innerHTML = `<strong>${obj.name}</strong><p>${obj.text}</p>`;
+        const btn = document.createElement('button');
+        btn.textContent = '收集線索';
+        btn.addEventListener('click', obj.effect);
+        card.append(btn);
+        objectsArea.append(card);
+      });
+    }
+
+    function buildPuzzles() {
+      puzzleArea.innerHTML = '';
+      buildDialPuzzle();
+      buildCipherPuzzle();
+      buildGlyphPuzzle();
+      buildFinalLock();
+    }
+
+    function buildDialPuzzle() {
+      const wrap = document.createElement('section');
+      wrap.className = 'puzzle';
+      wrap.innerHTML = `
+        <h3>1) 星盤轉盤</h3>
+        <p>點擊轉動三個轉盤，讓符號符合壁畫順序。達成時會吐出第一碼。</p>
+      `;
+
+      const dialRow = document.createElement('div');
+      dialRow.className = 'dials';
+
+      state.currentDials.forEach((val, idx) => {
+        const dial = document.createElement('div');
+        dial.className = 'dial';
+        dial.textContent = state.dialSymbols[val];
+        dial.addEventListener('click', () => {
+          state.currentDials[idx] = (state.currentDials[idx] + 1) % state.dialSymbols.length;
+          dial.textContent = state.dialSymbols[state.currentDials[idx]];
+          checkDials();
+        });
+        dialRow.append(dial);
+      });
+
+      wrap.append(dialRow);
+      puzzleArea.append(wrap);
+    }
+
+    function checkDials() {
+      const target = ['☀', '☾', '✶'];
+      const current = state.currentDials.map(i => state.dialSymbols[i]);
+      if (target.every((v, i) => v === current[i])) {
+        if (!state.solved.dials) {
+          state.solved.dials = true;
+          addLog('星盤吐出數字「6」。記下它。');
+          refreshStatus();
+        }
+      }
+    }
+
+    function buildCipherPuzzle() {
+      const wrap = document.createElement('section');
+      wrap.className = 'puzzle';
+      wrap.innerHTML = `
+        <h3>2) 羽筆密碼</h3>
+        <p>紙條標示「-1」，把它當作鑰匙，還原訊息後輸入答案。</p>
+      `;
+
+      const row = document.createElement('div');
+      row.className = 'input-row';
+      const input = document.createElement('input');
+      input.placeholder = '輸入答案，例如 moon';
+      const btn = document.createElement('button');
+      btn.textContent = '提交';
+
+      btn.addEventListener('click', () => {
+        const value = input.value.trim().toLowerCase();
+        if (value === 'hello world') {
+          if (!state.solved.cipher) {
+            state.solved.cipher = true;
+            addLog('羽筆在空中寫下數字「1」。');
+            refreshStatus();
+          }
+        } else {
+          addLog('羽筆沒有動靜，換個方式重新推回訊息。');
+        }
+      });
+
+      row.append(input, btn);
+      wrap.append(row);
+      puzzleArea.append(wrap);
+    }
+
+    function buildGlyphPuzzle() {
+      const wrap = document.createElement('section');
+      wrap.className = 'puzzle';
+      wrap.innerHTML = `
+        <h3>3) 符文速記</h3>
+        <p>根據展示櫃的對應關係，輸入三個符號代表的數字，得到第三碼。</p>
+      `;
+
+      const row = document.createElement('div');
+      row.className = 'input-row';
+      const input = document.createElement('input');
+      input.placeholder = '例如：340';
+      const btn = document.createElement('button');
+      btn.textContent = '核對';
+
+      btn.addEventListener('click', () => {
+        if (input.value.trim() === '340') {
+          if (!state.solved.glyph) {
+            state.solved.glyph = true;
+            addLog('符文亮起，露出數字「5」。');
+            refreshStatus();
+          }
+        } else {
+          addLog('符文仍然暗淡，或許順序與陳列時一致。');
+        }
+      });
+
+      row.append(input, btn);
+      wrap.append(row);
+      puzzleArea.append(wrap);
+    }
+
+    function buildFinalLock() {
+      const wrap = document.createElement('section');
+      wrap.className = 'puzzle';
+      wrap.innerHTML = `
+        <h3>最終鎖碼</h3>
+        <p>將三段數字按提示組成四位數。壁畫的順序、羽筆留下的數字與符文刻痕會互相呼應，最後別忘了那座常亮的燈塔。</p>
+      `;
+
+      const row = document.createElement('div');
+      row.className = 'input-row';
+      const input = document.createElement('input');
+      input.placeholder = '輸入四位數鎖碼';
+      const btn = document.createElement('button');
+      btn.textContent = '解鎖';
+
+      btn.addEventListener('click', () => {
+        if (input.value.trim() === '6158' && state.solved.dials && state.solved.cipher && state.solved.glyph) {
+          state.solved.final = true;
+          addLog('鎖匣打開，光芒溢出！恭喜解鎖全部謎題。');
+        } else if (input.value.trim() === '6158') {
+          addLog('鎖碼對了，但還缺少前置機關，先完成前面三題。');
+        } else {
+          addLog('鎖匣仍然緊閉，檢查三段提示組合是否正確。');
+        }
+        refreshStatus();
+      });
+
+      row.append(input, btn);
+      wrap.append(row);
+      puzzleArea.append(wrap);
+    }
+
+    renderObjects();
+    buildPuzzles();
+    refreshStatus();
+    addLog('歡迎來到謎盒。先在「房間線索」收集資料，逐步推理！');
+  </script>
+</body>
+</html>
